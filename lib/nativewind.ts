@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { cssInterop } from 'nativewind';
 import { Animated } from 'react-native';
@@ -13,6 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
  * Imported for its side effect from the root layout, before any screen renders.
  */
 cssInterop(Ionicons, { className: 'style' });
+cssInterop(MaterialCommunityIcons, { className: 'style' });
 cssInterop(Image, { className: 'style' });
 cssInterop(Animated.View, { className: 'style' });
 cssInterop(GestureHandlerRootView, { className: 'style' });

@@ -22,11 +22,17 @@ export function AuthSheet({ visible, mode, onClose, onContinueWithEmail }: AuthS
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-overlay" onPress={onClose} accessibilityLabel="Close" />
+      {/* Transparent by design — the sheet's shadow separates it from the screen behind,
+          so this layer only exists to catch taps outside the sheet. */}
+      <Pressable className="flex-1" onPress={onClose} accessibilityLabel="Close" />
 
-      {/* The bottom inset is a runtime device measurement, so it stays on `style`; the
-          design's own padding lives on the inner view to avoid fighting it. */}
-      <View className="rounded-t-xxl bg-bg shadow-float" style={{ paddingBottom: insets.bottom }}>
+      {/* Inset from every edge so the sheet reads as a floating card rather than a panel
+          welded to the bottom of the screen. The bottom inset is a runtime device
+          measurement, so it stays on `style` and stacks on top of the design's own gap. */}
+      <View
+        className="mx-3 rounded-xxl border border-border bg-bg shadow-float"
+        style={{ marginBottom: insets.bottom + 12 }}
+      >
         <View className="px-5 pb-6 pt-6">
           <View className="flex-row items-center justify-center">
             <Text className="text-h2 font-semibold text-ink">{title}</Text>

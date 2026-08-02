@@ -38,6 +38,31 @@ module.exports = {
         accent: '#FFD9A8',
         danger: '#DC2626',
 
+        /** The only place color carries meaning on its own — one hue per macro. */
+        macro: {
+          protein: '#F0453A',
+          carbs: '#F5A524',
+          fat: '#FBC02D',
+        },
+
+        /** The single tinted callout in the app: the plan-reveal teaser. */
+        info: {
+          DEFAULT: '#EDEAFB',
+          ink: '#6C5CE7',
+        },
+
+        /** Purely decorative — the celebration burst behind the plan-reveal illustration. */
+        confetti: {
+          purple: '#8B5CF6',
+          blue: '#38BDF8',
+          green: '#22C55E',
+          orange: '#FB923C',
+          pink: '#EC4899',
+          yellow: '#FACC15',
+          teal: '#2DD4BF',
+          red: '#EF4444',
+        },
+
         /** Third-party brand colors, only ever used for provider marks. */
         google: '#4285F4',
       },
@@ -52,11 +77,15 @@ module.exports = {
       },
 
       fontSize: {
+        /** The single hero number on a ruler screen — deliberately larger than `display`. */
+        metric: ['56px', { lineHeight: '62px' }],
         display: ['32px', { lineHeight: '38px' }],
         h1: ['28px', { lineHeight: '34px' }],
         h2: ['22px', { lineHeight: '28px' }],
         h3: ['18px', { lineHeight: '24px' }],
         body: ['16px', { lineHeight: '24px' }],
+        /** The supporting line under a card title — smaller than body, larger than caption. */
+        small: ['14px', { lineHeight: '20px' }],
         caption: ['12px', { lineHeight: '16px' }],
       },
 

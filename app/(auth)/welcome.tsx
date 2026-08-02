@@ -27,7 +27,7 @@ export default function Welcome() {
     // Insets are runtime device measurements, so they stay on `style`; the design's own
     // padding lives on the inner view to avoid fighting these values.
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
-      <View className="flex-1 px-5 pb-5 pt-4">
+      <View className="flex-1 px-5 pb-5 pt-8">
         <View className="flex-row items-center justify-center gap-2">
           <Image source={require('@/assets/images/logo-black.png')} className="h-10 w-10" contentFit="contain" />
           <Text className="text-h1 font-bold text-ink">CalBoost AI</Text>
@@ -35,15 +35,17 @@ export default function Welcome() {
 
         <Image
           source={require('@/assets/images/mobile-image.png')}
-          className="my-4 w-full flex-1"
-          contentFit="contain"
+          className="flex-1  w-full "
+         contentFit="contain"
           accessibilityLabel="Scanning a meal with the CalBoost camera"
         />
 
         <View className="items-center gap-4">
           <Text className="text-center text-display font-bold text-ink">Calorie tracking{'\n'}made easy</Text>
 
-          <Button label="Get Started" onPress={() => openSheet('sign-up')} />
+          {/* New users answer the onboarding questions first and create their account at
+              the end; only returning users go straight to the auth sheet. */}
+          <Button label="Get Started" onPress={() => router.push('/(onboarding)/gender')} />
 
           <Pressable
             onPress={() => openSheet('sign-in')}
