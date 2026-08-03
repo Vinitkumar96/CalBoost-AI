@@ -1,34 +1,33 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import type { NutritionPlan } from '@/lib/nutrition';
+import type {
+  ActivityLevel,
+  Gender,
+  GymExperience,
+  OnboardingDraft,
+  Pace,
+} from '@/lib/onboardingTypes';
 
-export type Gender = 'male' | 'female';
-
-export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'very' | 'extra';
-
-export type GymExperience = 'beginner' | 'intermediate' | 'advanced' | 'expert';
-
-/** How fast the user wants to gain. Ordered slowest → fastest; the slider relies on that. */
-export const PACES = ['lean', 'moderate', 'aggressive'] as const;
-
-export type Pace = (typeof PACES)[number];
+// The types moved to `lib/onboardingTypes.ts` so Convex functions can reach them without
+// pulling React into the bundle. Re-exported here because every step screen imports them
+// from this module.
+export type { ActivityLevel, Gender, GymExperience, OnboardingDraft, Pace };
+export { PACES } from '@/lib/onboardingTypes';
 
 /**
- * Nothing here is written to the server. The whole flow is a client-side draft so that a
- * drop-off at any step costs a network round-trip of exactly zero and creates no orphan
- * records — one mutation fires at the end of the flow instead.
+ * Where the draft waits out the auth round-trip.
+ *
+ * The provider below only lives inside the `(onboarding)` group, so both the email path
+ * (which pushes into `(auth)`) and the social path (which replaces the route on success)
+ * unmount it mid-flow. Without a copy on disk the answers would be gone by the time there
+ * is a session to attach them to. `stores/onboardingHandoff.tsx` reads it back.
+ *
+ * SecureStore rather than AsyncStorage only because it is already a dependency — Clerk's
+ * token cache uses it. The draft is ~200 bytes, far inside the 2 KB soft limit.
  */
-export type OnboardingDraft = {
-  gender: Gender | null;
-  heightCm: number;
-  weightKg: number;
-  targetWeightKg: number;
-  activity: ActivityLevel | null;
-  experience: GymExperience | null;
-  pace: Pace;
-  /** Filled in by the generating step; null until the plan comes back. */
-  plan: NutritionPlan | null;
-};
+export const PENDING_DRAFT_KEY = 'calboost.onboarding.pending';
 
 /** The audience median, so every screen opens on a plausible answer rather than an empty one. */
 const DEFAULTS: OnboardingDraft = {
@@ -60,12 +59,30 @@ type OnboardingContextValue = OnboardingDraft & {
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
+export function readPendingDraft(): Promise<OnboardingDraft | null> {
+  return SecureStore.getItemAsync(PENDING_DRAFT_KEY)
+    .then((raw) => (raw ? (JSON.parse(raw) as OnboardingDraft) : null))
+    .catch(() => null);
+}
+
+export function clearPendingDraft(): Promise<void> {
+  return SecureStore.deleteItemAsync(PENDING_DRAFT_KEY).catch(() => undefined);
+}
+
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const [draft, setDraft] = useState<OnboardingDraft>(DEFAULTS);
   // Until the user scrubs the target ruler themselves, the target trails their current
   // weight. Without this, going back to fix a current weight of 60→75 would silently leave
   // a target of 68 — i.e. a cut, in an app that only does bulks.
   const [targetTouched, setTargetTouched] = useState(false);
+
+  // Mirrored on every change rather than only at the end: the user can leave for `(auth)`
+  // from the save step, and by then this provider is already unmounting. Fire-and-forget —
+  // a failed write costs the handoff, not the session, and the flow must not block on disk.
+  useEffect(() => {
+    if (draft.plan === null) return;
+    void SecureStore.setItemAsync(PENDING_DRAFT_KEY, JSON.stringify(draft)).catch(() => undefined);
+  }, [draft]);
 
   const setGender = useCallback((gender: Gender) => setDraft((prev) => ({ ...prev, gender })), []);
 

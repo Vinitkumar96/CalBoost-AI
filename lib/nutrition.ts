@@ -1,4 +1,6 @@
-import type { ActivityLevel, GymExperience, OnboardingDraft, Pace } from '@/stores/onboarding';
+// Relative, not `@/` — this module is bundled into Convex functions, whose tsconfig carries
+// no path aliases.
+import type { ActivityLevel, Gender, GymExperience, Pace } from './onboardingTypes';
 
 /**
  * Pure plan math — no React, no I/O, so every number on the result screen can be checked by
@@ -9,7 +11,7 @@ import type { ActivityLevel, GymExperience, OnboardingDraft, Pace } from '@/stor
 const ASSUMED_AGE = 22;
 
 /** Mifflin-St Jeor sex constants. */
-const BMR_CONSTANT: Record<NonNullable<OnboardingDraft['gender']>, number> = {
+const BMR_CONSTANT: Record<Gender, number> = {
   male: 5,
   female: -161,
 };
@@ -83,7 +85,7 @@ export type NutritionPlan = {
 };
 
 export type PlanInputs = {
-  gender: NonNullable<OnboardingDraft['gender']>;
+  gender: Gender;
   heightCm: number;
   weightKg: number;
   activity: ActivityLevel;
